@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Mask_Bird_Feathers
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: Root
+    m_Weight: 0
+  - m_Path: Root/Body
+    m_Weight: 0
+  - m_Path: Root/Body/Tail
+    m_Weight: 1
+  - m_Path: Root/Body/Tail/Tail_Fan_L
+    m_Weight: 1
+  - m_Path: Root/Body/Tail/Tail_Fan_R
+    m_Weight: 1
+  - m_Path: Root/Body/Leg_L
+    m_Weight: 0
+  - m_Path: Root/Body/Leg_L/Foot_L
+    m_Weight: 0
+  - m_Path: Root/Body/Leg_R
+    m_Weight: 0
+  - m_Path: Root/Body/Leg_R/Foot_R
+    m_Weight: 0
+  - m_Path: Root/Body/Chest
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Neck
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Neck/Head
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Neck/Head/Beak
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Neck/Head/Eye_L
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Neck/Head/Eye_R
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Wing_L_Upper
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Wing_L_Upper/Wing_L_Forearm
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Wing_L_Upper/Wing_L_Forearm/Wing_L_Hand
+    m_Weight: 1
+  - m_Path: Root/Body/Chest/Wing_L_Upper/Wing_L_Forearm/Wing_L_Hand/Wing_L_Feathers
+    m_Weight: 1
+  - m_Path: Root/Body/Chest/Wing_L_Upper/Wing_L_Secondary
+    m_Weight: 1
+  - m_Path: Root/Body/Chest/Wing_R_Upper
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Wing_R_Upper/Wing_R_Forearm
+    m_Weight: 0
+  - m_Path: Root/Body/Chest/Wing_R_Upper/Wing_R_Forearm/Wing_R_Hand
+    m_Weight: 1
+  - m_Path: Root/Body/Chest/Wing_R_Upper/Wing_R_Forearm/Wing_R_Hand/Wing_R_Feathers
+    m_Weight: 1
+  - m_Path: Root/Body/Chest/Wing_R_Upper/Wing_R_Secondary
+    m_Weight: 1
