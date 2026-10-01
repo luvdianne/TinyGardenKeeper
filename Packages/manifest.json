@@ -1,7 +1,8 @@
 {
-    "dependencies": {
+  "dependencies": {
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
+    "com.unity.ai.assistant": "2.20.0-pre.1",
     "com.unity.ai.navigation": "2.0.14",
     "com.unity.collab-proxy": "2.13.3",
     "com.unity.ext.nunit": "2.1.0",
@@ -14,6 +15,7 @@
     "com.unity.timeline": "1.8.12",
     "com.unity.ugui": "2.5.0",
     "com.unity.visualscripting": "1.9.11",
+    "com.unity.xr.arfoundation": "6.5.1",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.ai": "1.0.0",
