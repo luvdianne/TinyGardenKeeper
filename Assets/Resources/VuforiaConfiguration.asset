@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: -2067402452, guid: 8a9a760f95896c34689febc965510927, type: 3}
   m_Name: VuforiaConfiguration
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Vuforia.Unity.Engine.dll::Vuforia.VuforiaConfiguration
   vuforia:
-    vuforiaLicenseKey: AdbmXxn/////AAABmbvlI9pP6E3Eqzh/DbKE7aloiE9zbfJZi/OV8qYGqpJpC+JKVU/JPuXdXTP4cnA8gCJEEF+p2mh9k4+3sC/568GXK0+n18+oqpSTo4FO8XX0bUu3y8YtdEX2oVP4zU1VbTGWd3YDy+0h2K/HDz9v22j6GB5GEPwVSXEUDvs8pA8/W8cOV+5XbtnNson5ip9TXGCfs28AP3b+RKDOpl6hM8IlTBUg0DlqEEfBZYgc+xpIh6XawD1ibYnBimCr83bXOVvwH3iNGRQZWGWUOOzQmXPYkiHBcvCocQkrM2AQd5rmVMhsv/ru1yP/I7nctIC5O1jj3Yujf4qe2I0TnzEllSClU32hzjn2t6hHyYEXeTMj
-    ufoLicenseKey: QWNyNS95Yi8vLy8vQUFBQUtPZUdacFFWMTBHZXQ0aHI1NmpubmpweXB5L3Q1aERhY0RWS3BucE9mN0owemtacXFPeUx6QlpwYmwvelRsOXFycGpjWjJVWE1kd0pXSmdTdzRKK21CNEg2WUJyaWV4Z0FKa0t4M2pvTVN0dEIreGU2cU1HZ3dzZHJDd1hhcEhNM0lPeXJDZGNGVDJaaDhFVGdsaU1CN0ErL3FRUDdWekl5ajFMWU9GSjRmdDRqdTJGOVFEeFcrSnJjNndjUjJFdGpUOHIxUmxCZk9yZGJObkU2OVk5RTdxTHlCYW82ak4xZlBuNTBHV001eTNGNzk5czhsTWgwZWRQRUE0Qm5uNUlYSkNrb29uMkNGbVpZUnR5TVEvWWlCd21sdEhTVGhDNGNWWGR3Z2NhNWh1VzZoYXExeitUTHNYeGhMaU5NUVNxQ1dqOWt3V1lkVEJmeVViNmxVYVQ4L2krQTU1MlBNMDFpcjRkWGEweDdpOFU=
+    vuforiaLicenseKey: 
+    ufoLicenseKey: QVZwS2VWci8vLy8vQUFBQUtEY285TEsyaWszRm1HRWh4TUVRaElkYktCeTZwOXExeVEwZjNqVFlmd2hrTzZiNG5DNjJXR0xYdEc4Ni9nVG5IYlVRRW1ianRrNDlIV0hjWU5XRjE1dmc1TmZBRGVIMTloYzhzaDU0djU2K0xqQks1cWwrTm9IZGJvdThxbEFmYXpCTXExNzZ0d2toY1hMR1ZvTWIyM3RoZ3dKeWU2bkRuWlBEcFJMaWU1TEN3RnltaEdKL1RMQTJqYXJLV0Q0UVRLcHVTZ204emhOZG8rcjN4WmNqdzhJTVZEL09mM3lrUEFlVXRpWkFpWG1nMzdxYWNsRzQ0M0NCMHd3SHA1SmNBWE1EV05YK2Nsekd4NXl2WU9iZGVwa1MxZnF0T2VJNmtGOGhtWDRXQm9UZGJHYjM1TVFCaHBhZmlSTVprVGxEaGt3alVrV3M5Q2NFSFJvNHU4SzdnYlNxUEdKU1ZQbkh3MFlDbWZnUzNVOS8=
     delayedInitialization: 0
     cameraFocusModeSetting: 2
     cameraDeviceModeSetting: -1
@@ -24,11 +24,11 @@ MonoBehaviour:
     shareRecordingsInITunes: 0
     logLevel: 0
     version: 11.4.4
-    eulaAcceptedVersions: '{"Values":["","11.4","0.0"]}'
+    eulaAcceptedVersions: '{"Values":["11.4","8.5"]}'
   database:
     disableModelExtraction: 0
   plugins:
-    pluginDirectory: Vuforia
+    pluginDirectory: asset://Vuforia
   shaders:
     depthMaskShader: {fileID: 4800000, guid: 9894afa5f3a5e4bbca625981beb1b20e, type: 3}
     outlineShader: {fileID: 4800000, guid: 88d3b6b5cf364476ca39fcec255331b1, type: 3}
