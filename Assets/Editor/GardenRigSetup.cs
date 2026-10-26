@@ -148,6 +148,7 @@ namespace TinyGardenKeeper.EditorTools
             {
                 s1.SetActive(true);
                 s1.transform.localPosition = new Vector3(0f, 0.211f, 0f);
+                s1.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                 s1.transform.localScale = Vector3.one * 18f;
             }
             if (s2 != null) s2.SetActive(false);
@@ -174,6 +175,7 @@ namespace TinyGardenKeeper.EditorTools
             {
                 s2.SetActive(true);
                 s2.transform.localPosition = new Vector3(0f, 0.211f, 0f);
+                s2.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                 s2.transform.localScale = Vector3.one * 26f;
             }
             if (sprout != null) sprout.SetActive(false);
@@ -199,12 +201,12 @@ namespace TinyGardenKeeper.EditorTools
             if (sprout != null)
             {
                 sprout.SetActive(true);
-                sprout.transform.localScale = Vector3.one * 0.35f;
-                sprout.transform.localPosition = new Vector3(-0.18f, 0.211f, 0f);
+                sprout.transform.localScale = Vector3.one * 0.65f;
+                sprout.transform.localPosition = new Vector3(-0.334f, 0.175f, 0f);
             }
             if (can != null) can.SetActive(false);
 
-            FocusSceneView(rig.transform.position + Vector3.up * 0.28f, 24f, -15f, 1.2f);
+            FocusSceneView(rig.transform.position + Vector3.up * 0.35f, 24f, -15f, 1.4f);
             CaptureViewDirect();
         }
 
@@ -363,7 +365,7 @@ namespace TinyGardenKeeper.EditorTools
                 stage1Obj = (GameObject)Object.Instantiate(stage1FBX, parent.transform);
                 stage1Obj.name = "Sprout_Stage1";
                 stage1Obj.transform.localPosition = new Vector3(0f, 0.211f, 0f);
-                stage1Obj.transform.localRotation = Quaternion.identity;
+                stage1Obj.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                 stage1Obj.transform.localScale = Vector3.one * 18f;
 
                 // Remove extraneous Blender Camera & Light if present
@@ -372,8 +374,8 @@ namespace TinyGardenKeeper.EditorTools
                 var lightChild = stage1Obj.transform.Find("Light");
                 if (lightChild != null) Object.DestroyImmediate(lightChild.gameObject);
 
-                // Assign PBR stage material with 4K textures
-                var stageMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/sprout/M_Sprout_Stage.mat");
+                // Assign PBR stage material with extracted 4K textures (blush cheeks, dot eyes, spiral stem)
+                var stageMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/sprout/M_Sprout_Stage1.mat");
                 if (stageMat != null)
                 {
                     foreach (var rend in stage1Obj.GetComponentsInChildren<Renderer>(true))
@@ -396,7 +398,7 @@ namespace TinyGardenKeeper.EditorTools
                 stage2Obj = (GameObject)Object.Instantiate(stage2FBX, parent.transform);
                 stage2Obj.name = "Sprout_Stage2";
                 stage2Obj.transform.localPosition = new Vector3(0f, 0.211f, 0f);
-                stage2Obj.transform.localRotation = Quaternion.identity;
+                stage2Obj.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                 stage2Obj.transform.localScale = Vector3.one * 26f;
 
                 // Remove extraneous Blender Camera & Light if present
@@ -405,8 +407,8 @@ namespace TinyGardenKeeper.EditorTools
                 var lightChild = stage2Obj.transform.Find("Light");
                 if (lightChild != null) Object.DestroyImmediate(lightChild.gameObject);
 
-                // Assign PBR stage material with 4K textures
-                var stageMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/sprout/M_Sprout_Stage.mat");
+                // Assign PBR stage material with extracted 4K textures (blush cheeks, smiling eyes, leaves)
+                var stageMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/sprout/M_Sprout_Stage2.mat");
                 if (stageMat != null)
                 {
                     foreach (var rend in stage2Obj.GetComponentsInChildren<Renderer>(true))
@@ -483,9 +485,9 @@ namespace TinyGardenKeeper.EditorTools
             {
                 sproutObj = (GameObject)Object.Instantiate(sproutFBX, parent.transform);
                 sproutObj.name = "Sprout";
-                sproutObj.transform.localPosition = new Vector3(-0.18f, 0.211f, 0f);
+                sproutObj.transform.localPosition = new Vector3(-0.334f, 0.175f, 0f);
                 sproutObj.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                sproutObj.transform.localScale = Vector3.one * 0.35f;
+                sproutObj.transform.localScale = Vector3.one * 0.65f;
 
                 // Remove extraneous Blender Camera & Light from imported FBX
                 var camChild = sproutObj.transform.Find("Camera");
