@@ -27,30 +27,35 @@ public class SproutDanceButton : MonoBehaviour
     private bool isPlaying = false;
     private Coroutine animationRoutine;
 
+    private bool isInitialized = false;
+
+    private void Awake()
+    {
+        EnsureInitialized();
+    }
+
     void Start()
     {
-        if (sprout == null)
-        {
-            Debug.LogError(
-                "Sprout is not assigned. Drag the plant into the Sprout field."
-            );
-
-            enabled = false;
-            return;
-        }
-
-        // Save the original plant transform.
-        originalScale = sprout.localScale;
-        originalPosition = sprout.localPosition;
-        originalRotation = sprout.localRotation;
-
-        // Start small, without changing material colors.
+        EnsureInitialized();
         ResetPlant();
     }
 
+    private void EnsureInitialized()
+    {
+        if (isInitialized) return;
+        if (sprout == null) sprout = transform;
+        if (sprout != null)
+        {
+            originalScale = sprout.localScale != Vector3.zero ? sprout.localScale : Vector3.one * 0.18f;
+            originalPosition = sprout.localPosition;
+            originalRotation = sprout.localRotation;
+            isInitialized = true;
+        }
+    }
     // Connect the Water Plant button to this method.
     public void GrowSprout()
     {
+        EnsureInitialized();
         if (sprout == null)
             return;
 
