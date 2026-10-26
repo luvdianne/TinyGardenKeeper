@@ -304,7 +304,7 @@ namespace TinyGardenKeeper.AR
                 lookDirection.y = 0f;
                 if (lookDirection.sqrMagnitude > 0.001f)
                 {
-                    targetRotation = Quaternion.LookRotation(lookDirection);
+                    targetRotation = Quaternion.LookRotation(lookDirection) * Quaternion.Euler(0f, 180f, 0f);
                 }
             }
 

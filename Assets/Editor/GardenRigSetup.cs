@@ -28,7 +28,7 @@ namespace TinyGardenKeeper.EditorTools
             Vector3 rigOrigin = new Vector3(0f, 0f, 1.2f);
             GameObject gardenRig = new GameObject("GardenRig");
             gardenRig.transform.position = rigOrigin;
-            gardenRig.transform.rotation = Quaternion.identity;
+            gardenRig.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             gardenRig.transform.localScale = Vector3.one;
             Undo.RegisterCreatedObjectUndo(gardenRig, "Create GardenRig");
 
@@ -99,7 +99,7 @@ namespace TinyGardenKeeper.EditorTools
             byte[] bytes = tex.EncodeToPNG();
             Object.DestroyImmediate(tex);
             System.IO.File.WriteAllBytes("Assets/Capture_Preview.png", bytes);
-            AssetDatabase.Refresh();
+            AssetDatabase.ImportAsset("Assets/Capture_Preview.png", ImportAssetOptions.ForceUpdate);
             Debug.Log("<color=cyan>[GardenRigSetup] Captured fresh Camera view to Assets/Capture_Preview.png</color>");
         }
 
@@ -127,7 +127,12 @@ namespace TinyGardenKeeper.EditorTools
             if (s1 != null) s1.SetActive(false);
             if (s2 != null) s2.SetActive(false);
             if (sprout != null) sprout.SetActive(false);
-            if (can != null) can.SetActive(false);
+            if (can != null)
+            {
+                can.SetActive(true);
+                var model = can.transform.Find("Model");
+                if (model != null) model.gameObject.SetActive(false);
+            }
 
             FocusSceneView(rig.transform.position + Vector3.up * 0.15f, 32f, -15f, 0.9f);
             CaptureViewDirect();
@@ -153,7 +158,12 @@ namespace TinyGardenKeeper.EditorTools
             }
             if (s2 != null) s2.SetActive(false);
             if (sprout != null) sprout.SetActive(false);
-            if (can != null) can.SetActive(false);
+            if (can != null)
+            {
+                can.SetActive(true);
+                var model = can.transform.Find("Model");
+                if (model != null) model.gameObject.SetActive(false);
+            }
 
             FocusSceneView(rig.transform.position + Vector3.up * 0.25f, 24f, -15f, 1.1f);
             CaptureViewDirect();
@@ -179,7 +189,12 @@ namespace TinyGardenKeeper.EditorTools
                 s2.transform.localScale = Vector3.one * 26f;
             }
             if (sprout != null) sprout.SetActive(false);
-            if (can != null) can.SetActive(false);
+            if (can != null)
+            {
+                can.SetActive(true);
+                var model = can.transform.Find("Model");
+                if (model != null) model.gameObject.SetActive(false);
+            }
 
             FocusSceneView(rig.transform.position + Vector3.up * 0.28f, 24f, -15f, 1.2f);
             CaptureViewDirect();
@@ -204,7 +219,12 @@ namespace TinyGardenKeeper.EditorTools
                 sprout.transform.localScale = Vector3.one * 0.65f;
                 sprout.transform.localPosition = new Vector3(-0.334f, 0.175f, 0f);
             }
-            if (can != null) can.SetActive(false);
+            if (can != null)
+            {
+                can.SetActive(true);
+                var model = can.transform.Find("Model");
+                if (model != null) model.gameObject.SetActive(false);
+            }
 
             FocusSceneView(rig.transform.position + Vector3.up * 0.35f, 24f, -15f, 1.4f);
             CaptureViewDirect();
@@ -227,11 +247,26 @@ namespace TinyGardenKeeper.EditorTools
             if (can != null)
             {
                 can.SetActive(true);
-                can.transform.localPosition = new Vector3(0.50f, -0.06f, 0f);
-                can.transform.localScale = Vector3.one * 0.40f;
+                var model = can.transform.Find("Model");
+                if (model != null) model.gameObject.SetActive(true);
+                can.transform.localPosition = new Vector3(1.60f, -0.66f, 0.83f);
+                can.transform.localRotation = Quaternion.Euler(0f, -35f, 0f);
+                can.transform.localScale = Vector3.one * 1.12f;
+
+                // Sample tilt animation
+                var all = AssetDatabase.LoadAllAssetsAtPath("Assets/Resources/WateringCan/WateringCanModel.fbx");
+                AnimationClip clip = null;
+                foreach (var a in all) if (a is AnimationClip c && c.name.Contains("ModelAction")) clip = c;
+                if (clip != null) clip.SampleAnimation(can, 0.8f);
+
+                // Simulate particles
+                var ps = can.GetComponentInChildren<ParticleSystem>(true);
+                var splash = rig.transform.Find("SoilSplashFX")?.GetComponent<ParticleSystem>();
+                if (ps != null) { ps.Clear(); ps.Play(); ps.Simulate(0.14f, true, true); }
+                if (splash != null) { splash.Clear(); splash.Play(); splash.Simulate(0.10f, true, true); }
             }
 
-            FocusSceneView(rig.transform.position + Vector3.up * 0.28f, 24f, -15f, 1.2f);
+            FocusSceneView(rig.transform.position + Vector3.up * 0.28f, 22f, -18f, 1.1f);
             CaptureViewDirect();
         }
 
@@ -240,10 +275,29 @@ namespace TinyGardenKeeper.EditorTools
         {
             var rig = GameObject.Find("GardenRig");
             if (rig == null) return;
+            PreviewResetState();
             var butterfly = rig.transform.Find("Companions/Butterfly")?.gameObject;
-            if (butterfly != null) butterfly.SetActive(true);
+            if (butterfly != null)
+            {
+                butterfly.SetActive(true);
+                butterfly.transform.localScale = Vector3.one * 0.0105f;
 
-            FocusSceneView(rig.transform.position + Vector3.up * 0.30f, 20f, -20f, 1.5f);
+                // Sample flight animation at 2.0s so butterfly body is in flight position
+                var blendPath = "Assets/Butterfly/Butterfly.blend";
+                var allAssets = AssetDatabase.LoadAllAssetsAtPath(blendPath);
+                AnimationClip clip = null;
+                foreach (var a in allAssets) if (a is AnimationClip c) { clip = c; break; }
+                if (clip != null) clip.SampleAnimation(butterfly, 2.0f);
+
+                // Simulate resting pollen grains directly on top of the soil
+                var dropper = butterfly.GetComponent<ButterflyPollenDropper>();
+                if (dropper != null)
+                {
+                    dropper.SimulatePollenLandingPreview(12, 4);
+                }
+            }
+
+            FocusSceneView(rig.transform.position + Vector3.up * 0.28f, 20f, -20f, 1.2f);
             CaptureViewDirect();
         }
 
@@ -285,11 +339,23 @@ namespace TinyGardenKeeper.EditorTools
             if (s1 != null) s1.SetActive(false);
             if (s2 != null) s2.SetActive(false);
             if (sprout != null) sprout.SetActive(false);
-            if (can != null) can.SetActive(false);
+            if (can != null)
+            {
+                can.SetActive(true);
+                var model = can.transform.Find("Model");
+                if (model != null) model.gameObject.SetActive(false);
+            }
             var companions = rig.transform.Find("Companions");
             if (companions != null)
             {
                 foreach (Transform child in companions) child.gameObject.SetActive(false);
+            }
+            var soilManager = rig.transform.Find("SoilPollenFX")?.GetComponent<SoilPollenManager>();
+            if (soilManager != null) soilManager.ClearImmediate();
+            else
+            {
+                var pollenFX = rig.transform.Find("SoilPollenFX")?.GetComponent<ParticleSystem>();
+                if (pollenFX != null) pollenFX.Clear();
             }
 
             FocusSceneView(rig.transform.position + Vector3.up * 0.12f, 38f, -25f, 1.1f);
@@ -344,14 +410,18 @@ namespace TinyGardenKeeper.EditorTools
 
         private static void CleanExistingGardenObjects()
         {
-            string[] namesToSweep = { "GardenRig", "Pot_AR", "Bird", "Crow", "Butterfly", "AR_Canvas", "ActivePlacementReticle", "Sprout", "Sprout_Stage1", "Sprout_Stage2", "Seed", "WateringCan" };
-            foreach (var name in namesToSweep)
+            string[] namesToSweep = { "GardenRig", "Pot_AR", "Bird", "Crow", "Butterfly", "AR_Canvas", "ActivePlacementReticle", "Sprout", "Sprout_Stage1", "Sprout_Stage2", "Seed", "WateringCan", "SoilSplashFX", "Companions", "SoilPollenFX" };
+            var allTransforms = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var t in allTransforms)
             {
-                GameObject existing = GameObject.Find(name);
-                while (existing != null)
+                if (t == null) continue;
+                foreach (var name in namesToSweep)
                 {
-                    Object.DestroyImmediate(existing);
-                    existing = GameObject.Find(name);
+                    if (t.name == name)
+                    {
+                        Object.DestroyImmediate(t.gameObject);
+                        break;
+                    }
                 }
             }
         }
@@ -434,6 +504,13 @@ namespace TinyGardenKeeper.EditorTools
                 potObj.transform.localPosition = Vector3.zero;
                 potObj.transform.localRotation = Quaternion.identity;
                 potObj.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+
+                // Add SoilCollisionPlane for dropped pollen collision
+                var soilPlane = new GameObject("SoilCollisionPlane");
+                soilPlane.transform.SetParent(potObj.transform, false);
+                // In Pot_AR (local scale 0.1), local Y 2.03f corresponds to 0.203m in GardenRig space (top surface of soil)
+                soilPlane.transform.localPosition = new Vector3(0f, 2.03f, 0f);
+                soilPlane.transform.localRotation = Quaternion.identity;
             }
             return potObj;
         }
@@ -502,13 +579,20 @@ namespace TinyGardenKeeper.EditorTools
                 {
                     smr.sharedMaterial = creamWhite;
                     smr.gameObject.SetActive(true);
+
+                    // Add CapsuleCollider for raycast tap detection to replay dance
+                    var col = smr.gameObject.AddComponent<CapsuleCollider>();
+                    col.center = smr.localBounds.center;
+                    col.radius = 1.2f;
+                    col.height = 3.5f;
                 }
 
                 // Attach SproutDanceButton for celebratory growth & dancing
                 var danceBtn = sproutObj.AddComponent<SproutDanceButton>();
                 danceBtn.sprout = sproutObj.transform;
-                danceBtn.startingSize = 0.15f;
-                danceBtn.growDuration = 2.5f;
+                danceBtn.startingSize = 1f;
+                danceBtn.growDuration = 0f;
+                danceBtn.finalScaleMultiplier = 1f;
                 danceBtn.danceDuration = 5f;
                 danceBtn.swayAngle = 14f;
                 danceBtn.swaySpeed = 3f;
@@ -528,10 +612,25 @@ namespace TinyGardenKeeper.EditorTools
             {
                 canObj = (GameObject)Object.Instantiate(canFBX, parent.transform);
                 canObj.name = "WateringCan";
-                // Hovered over the pot rim tilted into soil
-                canObj.transform.localPosition = new Vector3(0.50f, -0.06f, 0f);
-                canObj.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
-                canObj.transform.localScale = Vector3.one * 0.40f;
+                // Positioned on the right rim of the pot angled towards the soil (scaled appropriately to pot)
+                canObj.transform.localPosition = new Vector3(1.60f, -0.66f, 0.83f);
+                canObj.transform.localRotation = Quaternion.Euler(0f, -35f, 0f);
+                canObj.transform.localScale = Vector3.one * 1.12f;
+
+                // Disable/remove stray static mesh renderers on wateremitter/waterdrop
+                var emitterTrans = canObj.transform.Find("Model/wateremitter");
+                if (emitterTrans != null)
+                {
+                    var mr = emitterTrans.GetComponent<MeshRenderer>();
+                    if (mr != null) Object.DestroyImmediate(mr);
+                    var mf = emitterTrans.GetComponent<MeshFilter>();
+                    if (mf != null) Object.DestroyImmediate(mf);
+                }
+                var dropTrans = canObj.transform.Find("waterdrop");
+                if (dropTrans != null)
+                {
+                    Object.DestroyImmediate(dropTrans.gameObject);
+                }
 
                 // Add Animator
                 var anim = canObj.GetComponent<Animator>();
@@ -553,16 +652,108 @@ namespace TinyGardenKeeper.EditorTools
                     audioSrc.maxDistance = 5.0f;
                 }
 
+                // Add Water Droplet ParticleSystem to spout (wateremitter)
+                ParticleSystem waterPS = null;
+                if (emitterTrans != null)
+                {
+                    waterPS = emitterTrans.gameObject.AddComponent<ParticleSystem>();
+                    var main = waterPS.main;
+                    main.playOnAwake = false;
+                    main.loop = true;
+                    main.duration = 1.0f;
+                    main.startLifetime = new ParticleSystem.MinMaxCurve(0.12f, 0.16f);
+                    main.startSpeed = new ParticleSystem.MinMaxCurve(0.85f, 1.15f);
+                    main.startSize = new ParticleSystem.MinMaxCurve(0.032f, 0.052f);
+                    main.gravityModifier = 1.2f;
+                    main.simulationSpace = ParticleSystemSimulationSpace.World;
+                    main.maxParticles = 100;
+
+                    var emission = waterPS.emission;
+                    emission.rateOverTime = 55f;
+
+                    var shape = waterPS.shape;
+                    shape.shapeType = ParticleSystemShapeType.Cone;
+                    shape.angle = 6f;
+                    shape.radius = 0.012f;
+
+                    var colorLife = waterPS.colorOverLifetime;
+                    colorLife.enabled = true;
+                    Gradient grad = new Gradient();
+                    grad.SetKeys(
+                        new GradientColorKey[] { new GradientColorKey(new Color(0.35f, 0.85f, 1.0f), 0f), new GradientColorKey(new Color(0.65f, 0.95f, 1.0f), 1f) },
+                        new GradientAlphaKey[] { new GradientAlphaKey(0.95f, 0f), new GradientAlphaKey(0.90f, 0.8f), new GradientAlphaKey(0.0f, 1f) }
+                    );
+                    colorLife.color = grad;
+
+                    var sizeLife = waterPS.sizeOverLifetime;
+                    sizeLife.enabled = true;
+                    AnimationCurve sizeCurve = new AnimationCurve();
+                    sizeCurve.AddKey(0f, 0.75f);
+                    sizeCurve.AddKey(0.25f, 1.0f);
+                    sizeCurve.AddKey(0.85f, 1.0f);
+                    sizeCurve.AddKey(1f, 0.5f);
+                    sizeLife.size = new ParticleSystem.MinMaxCurve(1f, sizeCurve);
+
+                    var dropletMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/WateringCan/M_WaterDroplet.mat");
+                    var psRend = emitterTrans.GetComponent<ParticleSystemRenderer>();
+                    if (dropletMat != null && psRend != null)
+                    {
+                        psRend.sharedMaterial = dropletMat;
+                        psRend.renderMode = ParticleSystemRenderMode.Billboard;
+                    }
+                }
+
+                // Add Soil Splash ParticleSystem right on pot soil (GardenRig space: 0.02, 0.218, 0.01)
+                GameObject splashObj = new GameObject("SoilSplashFX");
+                splashObj.transform.SetParent(parent.transform, false);
+                splashObj.transform.localPosition = new Vector3(0.02f, 0.218f, 0.01f);
+                var splashPS = splashObj.AddComponent<ParticleSystem>();
+                var sMain = splashPS.main;
+                sMain.playOnAwake = false;
+                sMain.loop = true;
+                sMain.startLifetime = new ParticleSystem.MinMaxCurve(0.08f, 0.14f);
+                sMain.startSpeed = new ParticleSystem.MinMaxCurve(0.20f, 0.38f);
+                sMain.startSize = new ParticleSystem.MinMaxCurve(0.016f, 0.030f);
+                sMain.gravityModifier = 0.8f;
+                sMain.simulationSpace = ParticleSystemSimulationSpace.World;
+                sMain.maxParticles = 50;
+
+                var sEmission = splashPS.emission;
+                sEmission.rateOverTime = 35f;
+
+                var sShape = splashPS.shape;
+                sShape.shapeType = ParticleSystemShapeType.Circle;
+                sShape.radius = 0.06f;
+                sShape.rotation = new Vector3(-90f, 0f, 0f);
+
+                var sDropletMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/WateringCan/M_WaterDroplet.mat");
+                var sRend = splashObj.GetComponent<ParticleSystemRenderer>();
+                if (sDropletMat != null && sRend != null)
+                {
+                    sRend.sharedMaterial = sDropletMat;
+                    sRend.renderMode = ParticleSystemRenderMode.Billboard;
+                }
+
                 // Add ARWateringController
                 var wateringCtrl = canObj.AddComponent<ARWateringController>();
                 var so = new SerializedObject(wateringCtrl);
-                so.FindProperty("wateringCanRoot").objectReferenceValue = canObj;
+                var modelObj = canObj.transform.Find("Model");
+                so.FindProperty("wateringCanRoot").objectReferenceValue = modelObj != null ? modelObj.gameObject : canObj;
                 so.FindProperty("wateringAnimator").objectReferenceValue = anim;
                 so.FindProperty("waterAudioSource").objectReferenceValue = audioSrc;
+                so.FindProperty("waterParticleSystem").objectReferenceValue = waterPS;
+                so.FindProperty("soilSplashParticleSystem").objectReferenceValue = splashPS;
+                so.FindProperty("holdDuration").floatValue = 3.0f;
+                so.FindProperty("cooldownDuration").floatValue = 10.0f;
                 so.ApplyModifiedProperties();
 
-                // Watering can starts hidden until WATER button is clicked
-                canObj.SetActive(false);
+                // Keep canObj active so ARWateringController can run its Update() loop and cooldown countdown.
+                // The visual Model child is hidden initially.
+                if (modelObj != null)
+                {
+                    modelObj.gameObject.SetActive(false);
+                }
+                canObj.SetActive(true);
             }
             return canObj;
         }
@@ -576,17 +767,101 @@ namespace TinyGardenKeeper.EditorTools
 
             var visitManager = companionsRoot.AddComponent<CompanionVisitManager>();
 
+            // Setup SoilPollenFX under GardenRig to accumulate falling pollen directly on top of the soil
+            GameObject pollenFXObj = new GameObject("SoilPollenFX");
+            pollenFXObj.transform.SetParent(parent.transform, false);
+            pollenFXObj.transform.localPosition = Vector3.zero;
+            pollenFXObj.transform.localRotation = Quaternion.identity;
+
+            var pollenPS = pollenFXObj.AddComponent<ParticleSystem>();
+            var soilManager = pollenFXObj.AddComponent<SoilPollenManager>();
+            soilManager.pollenPS = pollenPS;
+            soilManager.gardenRig = parent.transform;
+
+            var main = pollenPS.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.Custom;
+            main.customSimulationSpace = parent.transform;
+            main.gravityModifier = 0.16f;
+            main.maxParticles = 800;
+            main.loop = false;
+            main.playOnAwake = true;
+
+            var em = pollenPS.emission;
+            em.enabled = false;
+
+            var shape = pollenPS.shape;
+            shape.enabled = false;
+
+            var pollenCol = pollenPS.collision;
+            pollenCol.enabled = true;
+            pollenCol.type = ParticleSystemCollisionType.Planes;
+            var soilPlane = potObj != null ? potObj.transform.Find("SoilCollisionPlane") : null;
+            if (soilPlane != null)
+            {
+                pollenCol.SetPlane(0, soilPlane);
+            }
+            pollenCol.bounce = 0f;
+            pollenCol.dampen = 1f;
+            pollenCol.lifetimeLoss = 0f;
+            pollenCol.minKillSpeed = 0f;
+            pollenCol.radiusScale = 1f;
+
             // 1. Butterfly
             GameObject butterflyObj = null;
-            var butterflyBlend = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Butterfly/Butterfly.blend");
+            const string blendPath = "Assets/Butterfly/Butterfly.blend";
+
+            // Configure Mesh Renderer on SoilPollenFX using Icosphere and fade-capable M_Soil_Pollen.mat
+            var psr = pollenFXObj.GetComponent<ParticleSystemRenderer>();
+            var allBlendAssets = AssetDatabase.LoadAllAssetsAtPath(blendPath);
+            UnityEngine.Mesh icoMesh = null;
+            Material mat003 = null;
+            foreach (var a in allBlendAssets)
+            {
+                if (a is UnityEngine.Mesh m && m.name == "Icosphere") icoMesh = m;
+                if (a is Material mat && mat.name == "Material.003") mat003 = mat;
+            }
+            var pollenMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Resources/Materials/M_Soil_Pollen.mat");
+            psr.renderMode = ParticleSystemRenderMode.Mesh;
+            if (icoMesh != null) psr.mesh = icoMesh;
+            if (pollenMat != null) psr.sharedMaterial = pollenMat;
+            else if (mat003 != null) psr.sharedMaterial = mat003;
+
+            var butterflyBlend = AssetDatabase.LoadAssetAtPath<GameObject>(blendPath);
             if (butterflyBlend != null)
             {
                 butterflyObj = (GameObject)Object.Instantiate(butterflyBlend, companionsRoot.transform);
                 butterflyObj.name = "Butterfly";
-                // Centered on pot soil
-                butterflyObj.transform.localPosition = new Vector3(0f, 0.28f, 0f);
+                // Hovering directly above the pot center (Y = 0.30m)
+                butterflyObj.transform.localPosition = new Vector3(0f, 0.30f, 0f);
                 butterflyObj.transform.localRotation = Quaternion.identity;
-                butterflyObj.transform.localScale = Vector3.one * 0.045f;
+
+                // Scale root so orbit radius (5.705 units) is ~0.06m (6cm), placing the flight and falling pollen directly over the pot soil!
+                butterflyObj.transform.localScale = Vector3.one * 0.0105f;
+
+                // Compensate butterfly body scale so the butterfly itself retains its visible size (~4.5cm wingspan)
+                var bodyTrans = butterflyObj.transform.Find("butterfly body");
+                if (bodyTrans != null)
+                {
+                    bodyTrans.localScale = new Vector3(0.7714f, 0.6000f, 0.7714f);
+
+                    // Disable all 86 baked Blender Dupli particle objects so they don't plunge through the floor
+                    for (int i = 0; i < bodyTrans.childCount; i++)
+                    {
+                        var child = bodyTrans.GetChild(i);
+                        if (child.name.Contains("Dupli") || child.name.Contains("Icosphere"))
+                        {
+                            var mr = child.GetComponent<MeshRenderer>();
+                            if (mr != null) mr.enabled = false;
+                            child.gameObject.SetActive(false);
+                        }
+                    }
+                }
+
+                // Disable helper objects from Blender
+                var rootIco = butterflyObj.transform.Find("Icosphere");
+                if (rootIco != null) rootIco.gameObject.SetActive(false);
+                var bezier = butterflyObj.transform.Find("BézierCircle");
+                if (bezier != null) bezier.gameObject.SetActive(false);
 
                 // Ensure Animator with ButterflyController
                 var anim = butterflyObj.GetComponent<Animator>();
@@ -594,9 +869,27 @@ namespace TinyGardenKeeper.EditorTools
                 var butterflyController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/GameSceneAssets/ButterflyController.controller");
                 if (butterflyController != null) anim.runtimeAnimatorController = butterflyController;
 
-                // Remove ButterflyTransition if attached so visitManager controls stay duration
+                // Attach enhanced ButterflyTransition for smooth arrival & graceful departure
                 var transition = butterflyObj.GetComponent<ButterflyTransition>();
-                if (transition != null) Object.DestroyImmediate(transition);
+                if (transition == null) transition = butterflyObj.AddComponent<ButterflyTransition>();
+                transition.SetTargetScale(Vector3.one * 0.0105f);
+                transition.SetVisitDuration(16f);
+
+                // Attach ButterflyPollenDropper to drop clusters of multiple really small pollen grains that fade out on departure
+                var dropper = butterflyObj.GetComponent<ButterflyPollenDropper>();
+                if (dropper == null) dropper = butterflyObj.AddComponent<ButterflyPollenDropper>();
+                dropper.soilPollenManager = soilManager;
+                dropper.butterflyBody = bodyTrans;
+                dropper.gardenRig = parent.transform;
+                dropper.butterflyTransition = transition;
+                dropper.dropInterval = 0.20f;
+                dropper.minClusterCount = 3;
+                dropper.maxClusterCount = 6;
+                dropper.minPollenSize = 0.0008f;
+                dropper.maxPollenSize = 0.0016f;
+                dropper.downwardVelocity = -0.08f;
+                dropper.inwardPull = 0.15f;
+                dropper.fadeDuration = 2.2f;
 
                 butterflyObj.SetActive(false);
             }
@@ -781,8 +1074,8 @@ namespace TinyGardenKeeper.EditorTools
             var fillArea = sliderObj.transform.Find("Fill Area/Fill");
             if (fillArea != null)
             {
-                var fillImg = fillArea.GetComponent<Image>();
-                if (fillImg != null) fillImg.color = new Color(0.30f, 0.85f, 0.40f, 1f);
+                var sliderFillImg = fillArea.GetComponent<Image>();
+                if (sliderFillImg != null) sliderFillImg.color = new Color(0.30f, 0.85f, 0.40f, 1f);
             }
             var handleSlideArea = sliderObj.transform.Find("Handle Slide Area");
             if (handleSlideArea != null) handleSlideArea.gameObject.SetActive(false);
@@ -807,52 +1100,54 @@ namespace TinyGardenKeeper.EditorTools
             GameObject bottomPanel = new GameObject("BottomControls", typeof(RectTransform));
             bottomPanel.transform.SetParent(canvasObj.transform, false);
             var bottomRect = bottomPanel.GetComponent<RectTransform>();
-            bottomRect.anchorMin = new Vector2(0.05f, 0.04f);
-            bottomRect.anchorMax = new Vector2(0.95f, 0.12f);
+            bottomRect.anchorMin = new Vector2(0.06f, 0.04f);
+            bottomRect.anchorMax = new Vector2(0.94f, 0.12f);
             bottomRect.offsetMin = Vector2.zero;
             bottomRect.offsetMax = Vector2.zero;
 
-            // Water Button
+            // Water Button (Full width of bottom panel)
             GameObject waterBtnObj = DefaultControls.CreateButton(uiResources);
             waterBtnObj.name = "WaterButton";
             waterBtnObj.transform.SetParent(bottomPanel.transform, false);
             var waterBtnRect = waterBtnObj.GetComponent<RectTransform>();
-            waterBtnRect.anchorMin = new Vector2(0f, 0f);
-            waterBtnRect.anchorMax = new Vector2(0.48f, 1f);
+            waterBtnRect.anchorMin = Vector2.zero;
+            waterBtnRect.anchorMax = Vector2.one;
             waterBtnRect.offsetMin = Vector2.zero;
             waterBtnRect.offsetMax = Vector2.zero;
             var waterBtnImg = waterBtnObj.GetComponent<Image>();
-            waterBtnImg.color = new Color(0.20f, 0.55f, 0.90f, 0.95f);
+            waterBtnImg.color = new Color(0.16f, 0.50f, 0.88f, 0.95f);
+
+            // Progress Fill Image inside WaterButton (radial/horizontal fill)
+            GameObject fillObj = new GameObject("ProgressFill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            fillObj.transform.SetParent(waterBtnObj.transform, false);
+            fillObj.transform.SetAsFirstSibling();
+            var fillRect = fillObj.GetComponent<RectTransform>();
+            fillRect.anchorMin = Vector2.zero;
+            fillRect.anchorMax = Vector2.one;
+            fillRect.offsetMin = Vector2.zero;
+            fillRect.offsetMax = Vector2.zero;
+            var btnFillImg = fillObj.GetComponent<Image>();
+            btnFillImg.color = new Color(0.35f, 0.85f, 1.0f, 0.50f);
+            btnFillImg.type = Image.Type.Filled;
+            btnFillImg.fillMethod = Image.FillMethod.Horizontal;
+            btnFillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
+            btnFillImg.fillAmount = 0f;
+
             var waterBtnText = waterBtnObj.GetComponentInChildren<Text>();
             if (waterBtnText != null)
             {
-                waterBtnText.text = "WATER";
+                waterBtnText.text = "HOLD TO WATER";
                 waterBtnText.font = defaultFont;
                 waterBtnText.fontSize = 32;
                 waterBtnText.fontStyle = FontStyle.Bold;
+                waterBtnText.alignment = TextAnchor.MiddleCenter;
                 waterBtnText.color = Color.white;
+                waterBtnText.horizontalOverflow = HorizontalWrapMode.Overflow;
+                waterBtnText.verticalOverflow = VerticalWrapMode.Overflow;
             }
 
-            // Nurture / Dance Button
-            GameObject danceBtnObj = DefaultControls.CreateButton(uiResources);
-            danceBtnObj.name = "PlantDanceButton";
-            danceBtnObj.transform.SetParent(bottomPanel.transform, false);
-            var danceBtnRect = danceBtnObj.GetComponent<RectTransform>();
-            danceBtnRect.anchorMin = new Vector2(0.52f, 0f);
-            danceBtnRect.anchorMax = new Vector2(1f, 1f);
-            danceBtnRect.offsetMin = Vector2.zero;
-            danceBtnRect.offsetMax = Vector2.zero;
-            var danceBtnImg = danceBtnObj.GetComponent<Image>();
-            danceBtnImg.color = new Color(0.95f, 0.60f, 0.15f, 0.95f);
-            var danceBtnText = danceBtnObj.GetComponentInChildren<Text>();
-            if (danceBtnText != null)
-            {
-                danceBtnText.text = "NURTURE (+25%)";
-                danceBtnText.font = defaultFont;
-                danceBtnText.fontSize = 28;
-                danceBtnText.fontStyle = FontStyle.Bold;
-                danceBtnText.color = Color.white;
-            }
+            // Attach WaterButtonHoldTrigger for 3-second hold detection
+            waterBtnObj.AddComponent<WaterButtonHoldTrigger>();
 
             return canvasObj;
         }
@@ -882,13 +1177,18 @@ namespace TinyGardenKeeper.EditorTools
                 {
                     var waterBtn = waterBtnTransform.GetComponent<Button>();
                     var waterBtnText = waterBtnTransform.GetComponentInChildren<Text>();
+                    var fillImg = waterBtnTransform.Find("ProgressFill")?.GetComponent<Image>();
+                    var holdTrigger = waterBtnTransform.GetComponent<WaterButtonHoldTrigger>();
+                    if (holdTrigger != null)
+                    {
+                        holdTrigger.SetController(waterCtrl);
+                    }
 
                     var canSO = new SerializedObject(waterCtrl);
                     canSO.FindProperty("waterButton").objectReferenceValue = waterBtn;
                     canSO.FindProperty("buttonLabel").objectReferenceValue = waterBtnText;
+                    canSO.FindProperty("buttonFillImage").objectReferenceValue = fillImg;
                     canSO.ApplyModifiedProperties();
-
-                    waterBtn.onClick.AddListener(waterCtrl.ToggleWatering);
                 }
             }
 
@@ -902,23 +1202,19 @@ namespace TinyGardenKeeper.EditorTools
             var slider = canvasObj.transform.Find("TopCard/GrowthProgressBar")?.GetComponent<Slider>();
             var percentText = canvasObj.transform.Find("TopCard/PercentText")?.GetComponent<Text>();
             var badgeText = canvasObj.transform.Find("TopCard/StatusBadgeText")?.GetComponent<Text>();
-            var uiDanceBtn = canvasObj.transform.Find("BottomControls/PlantDanceButton")?.GetComponent<Button>();
 
             so.FindProperty("growthProgressBar").objectReferenceValue = slider;
+            var barFillImg = slider != null && slider.fillRect != null ? slider.fillRect.GetComponent<Image>() : null;
+            so.FindProperty("progressBarFillImage").objectReferenceValue = barFillImg;
             so.FindProperty("growthPercentageText").objectReferenceValue = percentText;
             so.FindProperty("statusBadgeText").objectReferenceValue = badgeText;
-            so.FindProperty("plantDanceButton").objectReferenceValue = uiDanceBtn;
 
-            if (uiDanceBtn != null)
-            {
-                uiDanceBtn.onClick.AddListener(growthManager.OnPlantDanceButtonClicked);
-            }
-
-            // Growth rates
-            so.FindProperty("waterRate").floatValue = 0.15f;
-            so.FindProperty("butterflyBoostRate").floatValue = 0.04f;
-            so.FindProperty("birdBoostRate").floatValue = 0.05f;
+            // Growth rates (Discrete +3% water, zero passive, creature visits ~10% gentle boost)
+            so.FindProperty("waterCycleProgressBonus").floatValue = 0.03f;
+            so.FindProperty("butterflyBoostRate").floatValue = 0.005f;
+            so.FindProperty("birdBoostRate").floatValue = 0.0055f;
             so.FindProperty("crowWeakenRate").floatValue = 0.04f;
+            so.FindProperty("maxCompanionVisitBoost").floatValue = 0.10f;
 
             so.ApplyModifiedProperties();
         }

@@ -1,4 +1,3 @@
-
 using System.Collections;
 using UnityEngine;
 
@@ -9,9 +8,9 @@ public class SproutDanceButton : MonoBehaviour
 
     [Header("Growth")]
     [Range(0.01f, 1f)]
-    public float startingSize = 0.08f;
+    public float startingSize = 1f;
 
-    public float growDuration = 3f;
+    public float growDuration = 0f;
     public float finalScaleMultiplier = 1f;
 
     [Header("Dance")]
@@ -52,6 +51,7 @@ public class SproutDanceButton : MonoBehaviour
             isInitialized = true;
         }
     }
+
     // Connect the Water Plant button to this method.
     public void GrowSprout()
     {
@@ -87,7 +87,8 @@ public class SproutDanceButton : MonoBehaviour
         if (sprout == null)
             return;
 
-        sprout.localScale = originalScale * startingSize;
+        // Final sprout stays at full scale (scaleup animation removed)
+        sprout.localScale = originalScale * finalScaleMultiplier;
         sprout.localPosition = originalPosition;
         sprout.localRotation = originalRotation;
 
@@ -97,38 +98,15 @@ public class SproutDanceButton : MonoBehaviour
 
     IEnumerator GrowAndDance()
     {
-        Vector3 smallScale = originalScale * startingSize;
-        Vector3 bigScale = originalScale * finalScaleMultiplier;
+        Vector3 fullScale = originalScale * finalScaleMultiplier;
+        sprout.localScale = fullScale;
+        sprout.localPosition = originalPosition;
+        sprout.localRotation = originalRotation;
 
-        float elapsed = 0f;
-
-        // STEP 1: Grow.
-        while (elapsed < growDuration)
-        {
-            if (!isPlaying)
-                yield break;
-
-            elapsed += Time.deltaTime;
-
-            float t = Mathf.Clamp01(elapsed / growDuration);
-            float smoothT = Mathf.SmoothStep(0f, 1f, t);
-
-            sprout.localScale = Vector3.Lerp(
-                smallScale,
-                bigScale,
-                smoothT
-            );
-
-            sprout.localPosition = originalPosition;
-            sprout.localRotation = originalRotation;
-
-            yield return null;
-        }
-
-        sprout.localScale = bigScale;
+        // STEP 1: Scaleup animation removed - sprout starts dancing immediately at full size.
 
         // STEP 2: Dance.
-        elapsed = 0f;
+        float elapsed = 0f;
 
         while (elapsed < danceDuration)
         {
@@ -152,8 +130,8 @@ public class SproutDanceButton : MonoBehaviour
             yield return null;
         }
 
-        // STEP 3: Stay grown until the next click.
-        sprout.localScale = bigScale;
+        // STEP 3: Stay at full scale until next click.
+        sprout.localScale = fullScale;
         sprout.localPosition = originalPosition;
         sprout.localRotation = originalRotation;
 
