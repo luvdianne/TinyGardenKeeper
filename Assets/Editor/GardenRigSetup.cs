@@ -35,11 +35,18 @@ namespace TinyGardenKeeper.EditorTools
             // 4. Pot_AR
             GameObject potObj = SetupPotAR(gardenRig);
 
-            // 5. Seed
+            // 5. Seed (Stage 0: 0% - 30%)
             GameObject seedObj = SetupSeed(gardenRig);
 
-            // 6. Sprout (Dancing Sprout with sapling color textures)
-            GameObject sproutObj = SetupSprout(gardenRig);
+            // 6. Sprout Growth Stages:
+            // Stage 1 (30% - 65%)
+            GameObject sproutStage1Obj = SetupSproutStage1(gardenRig);
+
+            // Stage 2 (65% - 100%)
+            GameObject sproutStage2Obj = SetupSproutStage2(gardenRig);
+
+            // Stage 3 (Final dancing sprout at 100%)
+            GameObject sproutFinalObj = SetupSprout(gardenRig);
 
             // 7. Watering Can
             GameObject wateringCanObj = SetupWateringCan(gardenRig);
@@ -52,7 +59,7 @@ namespace TinyGardenKeeper.EditorTools
 
             // 10. Wire GardenGrowthManager
             var growthManager = gardenRig.AddComponent<GardenGrowthManager>();
-            WireGrowthManager(growthManager, seedObj, sproutObj, wateringCanObj, companionsObj, canvasObj);
+            WireGrowthManager(growthManager, seedObj, sproutStage1Obj, sproutStage2Obj, sproutFinalObj, wateringCanObj, companionsObj, canvasObj);
 
             // 11. Wire ARPotPlacement on XR Origin to track GardenRig
             SetupPotPlacement(gardenRig);
@@ -106,22 +113,96 @@ namespace TinyGardenKeeper.EditorTools
             }
         }
 
-        [MenuItem("TinyGarden/Preview/Show Sprout")]
+        [MenuItem("TinyGarden/Preview/Show Stage 0 (Seed)")]
+        public static void PreviewStage0Seed()
+        {
+            var rig = GameObject.Find("GardenRig");
+            if (rig == null) return;
+            var seed = rig.transform.Find("Seed")?.gameObject;
+            var s1 = rig.transform.Find("Sprout_Stage1")?.gameObject;
+            var s2 = rig.transform.Find("Sprout_Stage2")?.gameObject;
+            var sprout = rig.transform.Find("Sprout")?.gameObject;
+            var can = rig.transform.Find("WateringCan")?.gameObject;
+            if (seed != null) seed.SetActive(true);
+            if (s1 != null) s1.SetActive(false);
+            if (s2 != null) s2.SetActive(false);
+            if (sprout != null) sprout.SetActive(false);
+            if (can != null) can.SetActive(false);
+
+            FocusSceneView(rig.transform.position + Vector3.up * 0.15f, 32f, -15f, 0.9f);
+            CaptureViewDirect();
+        }
+
+        [MenuItem("TinyGarden/Preview/Show Stage 1 Sprout")]
+        public static void PreviewStage1Sprout()
+        {
+            var rig = GameObject.Find("GardenRig");
+            if (rig == null) return;
+            var seed = rig.transform.Find("Seed")?.gameObject;
+            var s1 = rig.transform.Find("Sprout_Stage1")?.gameObject;
+            var s2 = rig.transform.Find("Sprout_Stage2")?.gameObject;
+            var sprout = rig.transform.Find("Sprout")?.gameObject;
+            var can = rig.transform.Find("WateringCan")?.gameObject;
+            if (seed != null) seed.SetActive(false);
+            if (s1 != null)
+            {
+                s1.SetActive(true);
+                s1.transform.localPosition = new Vector3(0f, 0.211f, 0f);
+                s1.transform.localScale = Vector3.one * 18f;
+            }
+            if (s2 != null) s2.SetActive(false);
+            if (sprout != null) sprout.SetActive(false);
+            if (can != null) can.SetActive(false);
+
+            FocusSceneView(rig.transform.position + Vector3.up * 0.25f, 24f, -15f, 1.1f);
+            CaptureViewDirect();
+        }
+
+        [MenuItem("TinyGarden/Preview/Show Stage 2 Sprout")]
+        public static void PreviewStage2Sprout()
+        {
+            var rig = GameObject.Find("GardenRig");
+            if (rig == null) return;
+            var seed = rig.transform.Find("Seed")?.gameObject;
+            var s1 = rig.transform.Find("Sprout_Stage1")?.gameObject;
+            var s2 = rig.transform.Find("Sprout_Stage2")?.gameObject;
+            var sprout = rig.transform.Find("Sprout")?.gameObject;
+            var can = rig.transform.Find("WateringCan")?.gameObject;
+            if (seed != null) seed.SetActive(false);
+            if (s1 != null) s1.SetActive(false);
+            if (s2 != null)
+            {
+                s2.SetActive(true);
+                s2.transform.localPosition = new Vector3(0f, 0.211f, 0f);
+                s2.transform.localScale = Vector3.one * 26f;
+            }
+            if (sprout != null) sprout.SetActive(false);
+            if (can != null) can.SetActive(false);
+
+            FocusSceneView(rig.transform.position + Vector3.up * 0.28f, 24f, -15f, 1.2f);
+            CaptureViewDirect();
+        }
+
+        [MenuItem("TinyGarden/Preview/Show Final Sprout")]
         public static void PreviewSprout()
         {
             var rig = GameObject.Find("GardenRig");
             if (rig == null) return;
             var seed = rig.transform.Find("Seed")?.gameObject;
+            var s1 = rig.transform.Find("Sprout_Stage1")?.gameObject;
+            var s2 = rig.transform.Find("Sprout_Stage2")?.gameObject;
             var sprout = rig.transform.Find("Sprout")?.gameObject;
             var can = rig.transform.Find("WateringCan")?.gameObject;
             if (seed != null) seed.SetActive(false);
-            if (can != null) can.SetActive(false);
+            if (s1 != null) s1.SetActive(false);
+            if (s2 != null) s2.SetActive(false);
             if (sprout != null)
             {
                 sprout.SetActive(true);
                 sprout.transform.localScale = Vector3.one * 0.35f;
                 sprout.transform.localPosition = new Vector3(-0.18f, 0.211f, 0f);
             }
+            if (can != null) can.SetActive(false);
 
             FocusSceneView(rig.transform.position + Vector3.up * 0.28f, 24f, -15f, 1.2f);
             CaptureViewDirect();
@@ -133,9 +214,13 @@ namespace TinyGardenKeeper.EditorTools
             var rig = GameObject.Find("GardenRig");
             if (rig == null) return;
             var seed = rig.transform.Find("Seed")?.gameObject;
+            var s1 = rig.transform.Find("Sprout_Stage1")?.gameObject;
+            var s2 = rig.transform.Find("Sprout_Stage2")?.gameObject;
             var sprout = rig.transform.Find("Sprout")?.gameObject;
             var can = rig.transform.Find("WateringCan")?.gameObject;
             if (seed != null) seed.SetActive(true);
+            if (s1 != null) s1.SetActive(false);
+            if (s2 != null) s2.SetActive(false);
             if (sprout != null) sprout.SetActive(false);
             if (can != null)
             {
@@ -190,9 +275,13 @@ namespace TinyGardenKeeper.EditorTools
             var rig = GameObject.Find("GardenRig");
             if (rig == null) return;
             var seed = rig.transform.Find("Seed")?.gameObject;
+            var s1 = rig.transform.Find("Sprout_Stage1")?.gameObject;
+            var s2 = rig.transform.Find("Sprout_Stage2")?.gameObject;
             var sprout = rig.transform.Find("Sprout")?.gameObject;
             var can = rig.transform.Find("WateringCan")?.gameObject;
             if (seed != null) seed.SetActive(true);
+            if (s1 != null) s1.SetActive(false);
+            if (s2 != null) s2.SetActive(false);
             if (sprout != null) sprout.SetActive(false);
             if (can != null) can.SetActive(false);
             var companions = rig.transform.Find("Companions");
@@ -253,7 +342,7 @@ namespace TinyGardenKeeper.EditorTools
 
         private static void CleanExistingGardenObjects()
         {
-            string[] namesToSweep = { "GardenRig", "Pot_AR", "Bird", "Crow", "Butterfly", "AR_Canvas", "ActivePlacementReticle" };
+            string[] namesToSweep = { "GardenRig", "Pot_AR", "Bird", "Crow", "Butterfly", "AR_Canvas", "ActivePlacementReticle", "Sprout", "Sprout_Stage1", "Sprout_Stage2", "Seed", "WateringCan" };
             foreach (var name in namesToSweep)
             {
                 GameObject existing = GameObject.Find(name);
@@ -263,6 +352,72 @@ namespace TinyGardenKeeper.EditorTools
                     existing = GameObject.Find(name);
                 }
             }
+        }
+
+        private static GameObject SetupSproutStage1(GameObject parent)
+        {
+            var stage1FBX = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/sprout/sprout_stage1.fbx");
+            GameObject stage1Obj = null;
+            if (stage1FBX != null)
+            {
+                stage1Obj = (GameObject)Object.Instantiate(stage1FBX, parent.transform);
+                stage1Obj.name = "Sprout_Stage1";
+                stage1Obj.transform.localPosition = new Vector3(0f, 0.211f, 0f);
+                stage1Obj.transform.localRotation = Quaternion.identity;
+                stage1Obj.transform.localScale = Vector3.one * 18f;
+
+                // Remove extraneous Blender Camera & Light if present
+                var camChild = stage1Obj.transform.Find("Camera");
+                if (camChild != null) Object.DestroyImmediate(camChild.gameObject);
+                var lightChild = stage1Obj.transform.Find("Light");
+                if (lightChild != null) Object.DestroyImmediate(lightChild.gameObject);
+
+                // Assign PBR stage material with 4K textures
+                var stageMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/sprout/M_Sprout_Stage.mat");
+                if (stageMat != null)
+                {
+                    foreach (var rend in stage1Obj.GetComponentsInChildren<Renderer>(true))
+                    {
+                        rend.sharedMaterial = stageMat;
+                    }
+                }
+
+                stage1Obj.SetActive(false);
+            }
+            return stage1Obj;
+        }
+
+        private static GameObject SetupSproutStage2(GameObject parent)
+        {
+            var stage2FBX = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/sprout/sprout_stage2.fbx");
+            GameObject stage2Obj = null;
+            if (stage2FBX != null)
+            {
+                stage2Obj = (GameObject)Object.Instantiate(stage2FBX, parent.transform);
+                stage2Obj.name = "Sprout_Stage2";
+                stage2Obj.transform.localPosition = new Vector3(0f, 0.211f, 0f);
+                stage2Obj.transform.localRotation = Quaternion.identity;
+                stage2Obj.transform.localScale = Vector3.one * 26f;
+
+                // Remove extraneous Blender Camera & Light if present
+                var camChild = stage2Obj.transform.Find("Camera");
+                if (camChild != null) Object.DestroyImmediate(camChild.gameObject);
+                var lightChild = stage2Obj.transform.Find("Light");
+                if (lightChild != null) Object.DestroyImmediate(lightChild.gameObject);
+
+                // Assign PBR stage material with 4K textures
+                var stageMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/sprout/M_Sprout_Stage.mat");
+                if (stageMat != null)
+                {
+                    foreach (var rend in stage2Obj.GetComponentsInChildren<Renderer>(true))
+                    {
+                        rend.sharedMaterial = stageMat;
+                    }
+                }
+
+                stage2Obj.SetActive(false);
+            }
+            return stage2Obj;
         }
 
         private static GameObject SetupPotAR(GameObject parent)
@@ -700,15 +855,17 @@ namespace TinyGardenKeeper.EditorTools
             return canvasObj;
         }
 
-        private static void WireGrowthManager(GardenGrowthManager growthManager, GameObject seedObj, GameObject sproutObj, GameObject wateringCanObj, GameObject companionsObj, GameObject canvasObj)
+        private static void WireGrowthManager(GardenGrowthManager growthManager, GameObject seedObj, GameObject sproutStage1Obj, GameObject sproutStage2Obj, GameObject sproutFinalObj, GameObject wateringCanObj, GameObject companionsObj, GameObject canvasObj)
         {
             var so = new SerializedObject(growthManager);
             so.FindProperty("seedObject").objectReferenceValue = seedObj;
-            so.FindProperty("sproutObject").objectReferenceValue = sproutObj;
+            so.FindProperty("sproutStage1Object").objectReferenceValue = sproutStage1Obj;
+            so.FindProperty("sproutStage2Object").objectReferenceValue = sproutStage2Obj;
+            so.FindProperty("sproutFinalObject").objectReferenceValue = sproutFinalObj;
 
-            if (sproutObj != null)
+            if (sproutFinalObj != null)
             {
-                var danceBtn = sproutObj.GetComponent<SproutDanceButton>();
+                var danceBtn = sproutFinalObj.GetComponent<SproutDanceButton>();
                 so.FindProperty("sproutDanceButton").objectReferenceValue = danceBtn;
             }
 

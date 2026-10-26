@@ -4,24 +4,40 @@ using UnityEngine.UI;
 
 namespace TinyGardenKeeper.AR
 {
+    public enum GrowthStage
+    {
+        Seed = 0,
+        SproutStage1 = 1,
+        SproutStage2 = 2,
+        FinalSprout = 3
+    }
+
     /// <summary>
     /// Master gameplay manager for AR plant growth:
-    /// 1. Starts with Seed in pot soil.
-    /// 2. Water, Butterfly, and Bird accelerate growth.
-    /// 3. Crow weakens growth (player can tap crow to shoo it away).
-    /// 4. UI Progress Bar displays real-time 0-100% progress and status alerts.
-    /// 5. At 100%, Seed transforms into the Sprout, which executes its celebratory dance.
+    /// 1. Starts with Seed in pot soil (0% - 30%).
+    /// 2. Grows into Sprout Stage 1 (30% - 65%).
+    /// 3. Grows into Sprout Stage 2 (65% - 100%).
+    /// 4. Water, Butterfly, and Bird accelerate growth.
+    /// 5. Crow weakens growth (player can tap crow to shoo it away).
+    /// 6. UI Progress Bar displays real-time 0-100% progress and status alerts.
+    /// 7. At 100%, transforms into the Final Sprout, which executes its celebratory dance.
     /// </summary>
     public class GardenGrowthManager : MonoBehaviour
     {
         [Header("Plant Stages")]
-        [Tooltip("The starting seed GameObject in the pot.")]
+        [Tooltip("Stage 0: Starting seed (0% - 30%).")]
         [SerializeField] private GameObject seedObject;
 
-        [Tooltip("The fully-grown sprout GameObject.")]
-        [SerializeField] private GameObject sproutObject;
+        [Tooltip("Stage 1: Early sprout (30% - 65%).")]
+        [SerializeField] private GameObject sproutStage1Object;
 
-        [Tooltip("Procedural growth and dance controller on Sprout.")]
+        [Tooltip("Stage 2: Maturing sprout (65% - 100%).")]
+        [SerializeField] private GameObject sproutStage2Object;
+
+        [Tooltip("Stage 3: Fully-grown dancing sprout (100%).")]
+        [SerializeField] private GameObject sproutFinalObject;
+
+        [Tooltip("Procedural growth and dance controller on Final Sprout.")]
         [SerializeField] private SproutDanceButton sproutDanceButton;
 
         [Header("Systems")]
@@ -50,9 +66,11 @@ namespace TinyGardenKeeper.AR
         [Header("State")]
         [Range(0f, 1f)]
         [SerializeField] private float currentProgress = 0f;
+        private GrowthStage currentStage = GrowthStage.Seed;
         private bool isFullyGrown = false;
 
         public float CurrentProgress => currentProgress;
+        public GrowthStage CurrentStage => currentStage;
         public bool IsFullyGrown => isFullyGrown;
 
         private void Start()
@@ -69,15 +87,7 @@ namespace TinyGardenKeeper.AR
         {
             currentProgress = 0f;
             isFullyGrown = false;
-
-            if (seedObject != null)
-                seedObject.SetActive(true);
-
-            if (sproutObject != null)
-            {
-                sproutObject.SetActive(false);
-            }
-
+            SetStage(GrowthStage.Seed);
             UpdateUI();
         }
 
@@ -124,9 +134,53 @@ namespace TinyGardenKeeper.AR
             }
 
             currentProgress = Mathf.Clamp01(currentProgress + delta);
+            UpdateGrowthStages();
             UpdateUI(status);
+        }
 
-            if (currentProgress >= 1f && !isFullyGrown)
+        private void UpdateGrowthStages()
+        {
+            GrowthStage targetStage;
+            if (currentProgress >= 1f)
+            {
+                targetStage = GrowthStage.FinalSprout;
+            }
+            else if (currentProgress >= 0.65f)
+            {
+                targetStage = GrowthStage.SproutStage2;
+            }
+            else if (currentProgress >= 0.30f)
+            {
+                targetStage = GrowthStage.SproutStage1;
+            }
+            else
+            {
+                targetStage = GrowthStage.Seed;
+            }
+
+            if (targetStage != currentStage)
+            {
+                SetStage(targetStage);
+            }
+        }
+
+        private void SetStage(GrowthStage stage)
+        {
+            currentStage = stage;
+
+            if (seedObject != null)
+                seedObject.SetActive(stage == GrowthStage.Seed);
+
+            if (sproutStage1Object != null)
+                sproutStage1Object.SetActive(stage == GrowthStage.SproutStage1);
+
+            if (sproutStage2Object != null)
+                sproutStage2Object.SetActive(stage == GrowthStage.SproutStage2);
+
+            if (sproutFinalObject != null)
+                sproutFinalObject.SetActive(stage == GrowthStage.FinalSprout);
+
+            if (stage == GrowthStage.FinalSprout && !isFullyGrown)
             {
                 OnGrowthCompleted();
             }
@@ -140,15 +194,6 @@ namespace TinyGardenKeeper.AR
             if (wateringController != null && wateringController.IsWatering)
             {
                 wateringController.SetWatering(false);
-            }
-
-            // Hide seed, reveal sprout
-            if (seedObject != null)
-                seedObject.SetActive(false);
-
-            if (sproutObject != null)
-            {
-                sproutObject.SetActive(true);
             }
 
             // Trigger celebration dance
@@ -172,12 +217,10 @@ namespace TinyGardenKeeper.AR
             }
             else
             {
-                // Instant cheat/nurture button for testing
+                // Instant cheat/nurture button for testing (+25%)
                 currentProgress = Mathf.Clamp01(currentProgress + 0.25f);
-                if (currentProgress >= 1f)
-                {
-                    OnGrowthCompleted();
-                }
+                UpdateGrowthStages();
+                UpdateUI();
             }
         }
 
@@ -195,7 +238,12 @@ namespace TinyGardenKeeper.AR
 
             if (statusBadgeText != null)
             {
-                statusBadgeText.text = statusOverride ?? (isFullyGrown ? "Full Bloom! Sprout Dancing!" : "Plant Seed & Water");
+                string stageBadge = isFullyGrown ? "Full Bloom! Sprout Dancing!" :
+                                   currentStage == GrowthStage.SproutStage2 ? "Maturing Sprout (Stage 2)" :
+                                   currentStage == GrowthStage.SproutStage1 ? "Young Sprout (Stage 1)" :
+                                   "Seed in Soil";
+
+                statusBadgeText.text = statusOverride != null ? $"{stageBadge} - {statusOverride}" : stageBadge;
             }
 
             if (plantDanceButton != null)
