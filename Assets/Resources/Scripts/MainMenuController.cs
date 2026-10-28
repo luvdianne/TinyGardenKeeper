@@ -9,11 +9,16 @@ public class MainMenuController : MonoBehaviour
 
     public void LoadMainMenu()
     {
+        // 1. Unfreeze time
         Time.timeScale = 1f; 
         
-        // Ensure audio is unmuted before loading the Main Menu
+        // 2. Unpause the global audio listener (from the Pause menu)
         AudioListener.pause = false; 
         
+        // 3. Reset the global volume back to 100% (from the Mute button)
+        AudioListener.volume = 1f; 
+        
+        // 4. Load the Main Menu
         SceneManager.LoadScene(menuSceneName);
     }
 }
