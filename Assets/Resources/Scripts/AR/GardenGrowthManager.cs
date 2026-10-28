@@ -46,6 +46,7 @@ namespace TinyGardenKeeper.AR
         [Header("Systems")]
         [SerializeField] private ARWateringController wateringController;
         [SerializeField] private CompanionVisitManager companionManager;
+        [SerializeField] private VictoryManager victoryManager;
 
         [Header("Growth Rates (% per second)")]
         [Tooltip("Growth added per completed 3s watering cycle (+3%).")]
@@ -270,16 +271,21 @@ namespace TinyGardenKeeper.AR
         {
             isFullyGrown = true;
 
-            // Notify watering controller to lock out and show full bloom
             if (wateringController != null)
             {
                 wateringController.SetPlantFullyGrown();
             }
 
-            // Trigger celebration dance
+            // 1. Trigger celebration dance HERE once
             if (sproutDanceButton != null)
             {
                 sproutDanceButton.GrowSprout();
+            }
+
+            // 2. Trigger audio swap & victory modal
+            if (victoryManager != null)
+            {
+                victoryManager.TriggerVictorySequence();
             }
 
             UpdateUI("Full Bloom! Sprout Dancing! Tap Sprout to Dance!");
