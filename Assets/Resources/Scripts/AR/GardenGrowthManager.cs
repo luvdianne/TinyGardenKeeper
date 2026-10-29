@@ -48,6 +48,13 @@ namespace TinyGardenKeeper.AR
         [SerializeField] private CompanionVisitManager companionManager;
         [SerializeField] private VictoryManager victoryManager;
 
+        [Header("Fireworks Celebration")]
+        [Tooltip("Scene ParticleSystem that plays once when the sprout reaches 100%. Keep its GameObject active and disable Play On Awake.")]
+        [SerializeField] private ParticleSystem fireworksEffect;
+
+        [Tooltip("Fireworks position relative to the final sprout. Adjust for your AR model size.")]
+        [SerializeField] private Vector3 fireworksOffset = new Vector3(0f, 0.5f, 0f);
+
         [Header("Growth Rates (% per second)")]
         [Tooltip("Growth added per completed 3s watering cycle (+3%).")]
         [SerializeField] private float waterCycleProgressBonus = 0.03f;
@@ -143,6 +150,13 @@ namespace TinyGardenKeeper.AR
             currentProgress = 0f;
             currentVisitBoost = 0f;
             isFullyGrown = false;
+
+            // Make sure no fireworks are visible when a new garden starts.
+            if (fireworksEffect != null)
+            {
+                fireworksEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
             SetStage(GrowthStage.Seed);
             UpdateUI();
         }
@@ -282,7 +296,21 @@ namespace TinyGardenKeeper.AR
                 sproutDanceButton.GrowSprout();
             }
 
-            // 2. Trigger audio swap & victory modal
+            // 2. Launch fireworks once when the final sprout becomes fully grown.
+            if (fireworksEffect != null)
+            {
+                // Position the scene effect above the sprout before playing it.
+                if (sproutFinalObject != null)
+                {
+                    fireworksEffect.transform.position =
+                        sproutFinalObject.transform.TransformPoint(fireworksOffset);
+                }
+
+                fireworksEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                fireworksEffect.Play(true);
+            }
+
+            // 3. Trigger audio swap & victory modal
             if (victoryManager != null)
             {
                 victoryManager.TriggerVictorySequence();

@@ -12,12 +12,16 @@ public class VictoryManager : MonoBehaviour
     [SerializeField] private CanvasGroup victoryCanvasGroup;
     [SerializeField] private float fadeDuration = 1.5f;
 
+    [Header("Blur Effect")]
+    [SerializeField] private VictoryBackgroundBlur backgroundBlur;
+
     [Header("Dance Script Reference")]
     [SerializeField] private SproutDanceButton sproutDance;
 
+    private bool victoryTriggered;
+
     private void Start()
     {
-        // Hide modal at start
         if (victoryCanvasGroup != null)
         {
             victoryCanvasGroup.alpha = 0f;
@@ -28,42 +32,36 @@ public class VictoryManager : MonoBehaviour
 
     public void TriggerVictorySequence()
     {
+        if (victoryTriggered) return;
+        victoryTriggered = true;
         StartCoroutine(VictorySequenceRoutine());
     }
 
     private IEnumerator VictorySequenceRoutine()
     {
-        // 1. Allow dance music to play even when all other audio is paused
+        // Pause every other source and keep only the dance music playing.
         if (danceMusic != null)
-        {
             danceMusic.ignoreListenerPause = true;
-        }
 
-        // 2. Pause ALL audio in the game
         AudioListener.pause = true;
-
-        // 3. Play ONLY the dance music
         if (danceMusic != null)
-        {
             danceMusic.Play();
-        }
 
-        // 4. Wait for the dance animation to finish
+        // Keep the modal hidden while the sprout dances.
         float danceDelay = sproutDance != null ? sproutDance.danceDuration : 4f;
         yield return new WaitForSeconds(danceDelay);
 
-        // 5. Fade in the victory modal
-        float elapsed = 0f;
+        // Capture the game screen BEFORE the modal appears.
+        // The background is a still frame, not a live blur.
+        if (backgroundBlur != null)
+            yield return StartCoroutine(backgroundBlur.CaptureAndBlur());
 
+        float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
-
             if (victoryCanvasGroup != null)
-            {
-                victoryCanvasGroup.alpha = Mathf.Clamp01(elapsed / fadeDuration);
-            }
-
+                victoryCanvasGroup.alpha = Mathf.Clamp01(elapsed / Mathf.Max(0.001f, fadeDuration));
             yield return null;
         }
 
@@ -75,16 +73,11 @@ public class VictoryManager : MonoBehaviour
         }
     }
 
-    // =========================
-    // BUTTON ACTIONS
-    // =========================
-
     public void PlayAgain()
     {
         Time.timeScale = 1f;
         AudioListener.pause = false;
         AudioListener.volume = 1f;
-
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -93,7 +86,6 @@ public class VictoryManager : MonoBehaviour
         Time.timeScale = 1f;
         AudioListener.pause = false;
         AudioListener.volume = 1f;
-
         SceneManager.LoadScene("MainMenu");
     }
 }
