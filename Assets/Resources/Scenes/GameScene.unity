@@ -4008,7 +4008,7 @@ MonoBehaviour:
   victoryManager: {fileID: 1526120240}
   fireworksEffect: {fileID: 1950896034}
   fireworksOffset: {x: 0, y: 0.5, z: 0}
-  waterCycleProgressBonus: 0.65
+  waterCycleProgressBonus: 0.05
   butterflyBoostRate: 0.005
   birdBoostRate: 0.0055
   crowWeakenRate: 0.04
